@@ -7,26 +7,26 @@ go:
 - "1.13.7"
 branches:
   only:
-  - ginkgo-latest-stable
+  - github-release-resource-latest-stable
 before_install:
   - sudo apt-get -y install jq
 addons:
   apt:
     update: true
 install:
-- GINKGO_TAG=$(curl -s https://api.github.com/repos/onsi/ginkgo/releases/latest | jq -r .tag_name)
-- export GINKGO_TAG
-- git clone --branch "${GINKGO_TAG}" https://github.com/onsi/ginkgo.git "${TRAVIS_BUILD_DIR}/ginkgo"
+- GITHUB_RELEASE_RESOURCE_TAG=$(curl -s https://api.github.com/repos/concourse/github-release-resource/releases/latest | jq -r .tag_name)
+- export GITHUB_RELEASE_RESOURCE_TAG
+- git clone --branch "${GITHUB_RELEASE_RESOURCE_TAG}" https://github.com/concourse/github-release-resource.git "${TRAVIS_BUILD_DIR}/github-release-resource"
 script:
   - |-
-    export TRAVIS_TAG="ginkgo-${GINKGO_TAG}"
+    export TRAVIS_TAG="github-release-resource-${GITHUB_RELEASE_RESOURCE_TAG}"
     if curl -sSLf "https://api.github.com/repos/aadyyb/precompiled_tools/releases/tags/${TRAVIS_TAG}" -o /dev/null; then
       echo "Release exists, skip the build"
       unset TRAVIS_TAG
       exit 0
     else
-      cd ${TRAVIS_BUILD_DIR}/ginkgo
-      make -f ${TRAVIS_BUILD_DIR}/Makefile build-ginkgo
+      cd ${TRAVIS_BUILD_DIR}/github-release-resource
+      make -f ${TRAVIS_BUILD_DIR}/Makefile build-github-release-resource
     fi
 before_deploy:
   - |-
@@ -44,10 +44,10 @@ deploy:
     secure: YgWI3BxQUX23H+KQ5LZULs3lT3QrqourFRcBDjIRe1iU098CxJ4dOR3D4vbqaVDu1ye7ePPX78aCNa1TxcktK9CZzTnd662EYQSiPYww1sTxLYgLX8mrbcG/MyZAq7IpclI26NVlV1AILdy2j5I0Ogwh3Y3IQQ3uQDM+BdsP/VIqZhLzufWX7SRlyWeUNi8TlpOw39yo6itVYX0DP5/MUOI7fqno3zNURgsBgtQ0psGl7wWVVZfpd5m6ObpuD3FuStSkip1BXsFBeTtP5wzN/prJxgeAyBrdIQUHxQR4mRiBhWeyOcEsR+xrZciGR/o1aNqf4tXdn8zI7909MuEoWawGCHFB4w4pyK+zeQhE22FVGBP8rsTiqkhT5H5Uhgxujh1JKtfImqlV4ycSUSSFe2gfyTX/fEhtlx4VnMhMvNk3l8HDBbO0CkXFGLsbqpyJMMSrUag5WkpKypyDKIfRtxkDFX+lYX42tvnd82bCgu6VodiuCRh+13uFaUJRsvqu37kR52SH1gN8DiR+IXw4SGuUfPrGlUMa5AedeIXNYP5ByYqT1lX/6cUniV5aScsT3rFgoAtGu1dNluOvGBDx+hdh3X0vQcHIu0iTlp8Vdf53Gdtzx2clghLiYEWHX2ZYrZH5jnVZ+p1hvsHQNzYhgHcUtuMmt9p72wy8QaNLjYU=
   file_glob: true
   file:
-  - $TRAVIS_BUILD_DIR/ginkgo/release/*.tar.gz
-  - $TRAVIS_BUILD_DIR/ginkgo/release/*.tar.gz.sha256sum
+  - $TRAVIS_BUILD_DIR/github-release-resource/release/*.tar.gz
+  - $TRAVIS_BUILD_DIR/github-release-resource/release/*.tar.gz.sha256sum
   name: ${TRAVIS_TAG} Build $(date +'%d.%m.%Y %R')
-  release_notes: "nightly build for new ginkgo stable release"
+  release_notes: "nightly build for new github-release-resource stable release"
   prerelease: true
   skip_cleanup: true
   on:

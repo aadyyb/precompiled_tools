@@ -9,57 +9,46 @@ go:
 - "1.13.7"
 branches:
   only:
-  - master
+  - cobra-master
 before_install:
 - uname -r
 install:
-- export CWD=$(pwd)
-- git clone --branch "${COBRA_BRANCH}" https://github.com/spf13/cobra.git "${CWD}/cobra"
-- cd ${CWD}/cobra
+- git clone --branch "${COBRA_BRANCH}" https://github.com/spf13/cobra.git "${TRAVIS_BUILD_DIR}/cobra"
 script:
-- pwd
-- cd ${CWD}/cobra
-- export COBRA_GO_PSEUDO_VERSION=$(TZ=UTC git --no-pager show --quiet --abbrev=12 --date='format-local:%Y%m%d%H%M%S' --format="%cd-%h")
-- export COBRA_TRAVIS_TAG="cobra-v0.0.0-${COBRA_GO_PSEUDO_VERSION}"
-- echo "${COBRA_TRAVIS_TAG}"
-- export TRAVIS_TAG="${COBRA_TRAVIS_TAG}"
-- if curl -sSLf "https://api.github.com/repos/aadyyb/precompiled_tools/releases/tags/${TRAVIS_TAG}" -o /dev/null; then echo "Release exists, skip the build" ; unset TRAVIS_TAG ; exit 0 ; fi
-- export RELEASES="${CWD}/releases"
-- mkdir -p ${RELEASES}
-- echo "Building cobra-linux-amd64..."
-- rm -f ${RELEASES}/cobra
-- cd ${CWD}/cobra
-- GOOS=linux GOARCH=amd64 go build -o "${RELEASES}/cobra" github.com/spf13/cobra/cobra
-- cd ${RELEASES}
-- tar -czf cobra-linux-amd64.tar.gz cobra
-- sha256sum cobra-linux-amd64.tar.gz > cobra-linux-amd64.tar.gz.sha256sum
-- echo "Building cobra-darwin-amd64..."
-- rm -f ${RELEASES}/cobra
-- cd ${CWD}/cobra
-- GOOS=darwin GOARCH=amd64 go build -o "${RELEASES}/cobra" github.com/spf13/cobra/cobra
-- cd ${RELEASES}
-- tar -czf cobra-darwin-amd64.tar.gz cobra
-- sha256sum cobra-darwin-amd64.tar.gz > cobra-darwin-amd64.tar.gz.sha256sum
-- cd $TRAVIS_BUILD_DIR
-- ls -alrht ${RELEASES}/*.tar.gz
+  - |-
+    cd ${TRAVIS_BUILD_DIR}/cobra
+    export COBRA_GO_PSEUDO_VERSION=$(TZ=UTC git --no-pager show --quiet --abbrev=12 --date='format-local:%Y%m%d%H%M%S' --format="%cd-%h")
+    export TRAVIS_TAG="cobra-v0.0.0-${COBRA_GO_PSEUDO_VERSION}"
+    if curl -sSLf "https://api.github.com/repos/aadyyb/precompiled_tools/releases/tags/${TRAVIS_TAG}" -o /dev/null; then
+      echo "Release exists, skip the build"
+      unset TRAVIS_TAG
+      exit 0
+    else
+      cd ${TRAVIS_BUILD_DIR}/cobra
+      make -f ${TRAVIS_BUILD_DIR}/Makefile build-cobra
+    fi
 before_deploy:
-- git config --local user.name "precompiled_tools"
-- git config --local user.email "precompiled_tools@users.noreply.github.com"
-- cd $TRAVIS_BUILD_DIR
-- if git rev-parse "${TRAVIS_TAG}"; then echo "Deleting old tag" && git tag -d "${TRAVIS_TAG}"; fi
-- git tag "${TRAVIS_TAG}"
+  - |-
+    git config --local user.name "precompiled_tools"
+    git config --local user.email "precompiled_tools@users.noreply.github.com"
+    cd ${TRAVIS_BUILD_DIR}
+    if git rev-parse "${TRAVIS_TAG}"; then
+      echo "Deleting old tag" && git tag -d "${TRAVIS_TAG}"
+    else
+      git tag "${TRAVIS_TAG}"
+    fi
 deploy:
   provider: releases
   token:
     secure: YgWI3BxQUX23H+KQ5LZULs3lT3QrqourFRcBDjIRe1iU098CxJ4dOR3D4vbqaVDu1ye7ePPX78aCNa1TxcktK9CZzTnd662EYQSiPYww1sTxLYgLX8mrbcG/MyZAq7IpclI26NVlV1AILdy2j5I0Ogwh3Y3IQQ3uQDM+BdsP/VIqZhLzufWX7SRlyWeUNi8TlpOw39yo6itVYX0DP5/MUOI7fqno3zNURgsBgtQ0psGl7wWVVZfpd5m6ObpuD3FuStSkip1BXsFBeTtP5wzN/prJxgeAyBrdIQUHxQR4mRiBhWeyOcEsR+xrZciGR/o1aNqf4tXdn8zI7909MuEoWawGCHFB4w4pyK+zeQhE22FVGBP8rsTiqkhT5H5Uhgxujh1JKtfImqlV4ycSUSSFe2gfyTX/fEhtlx4VnMhMvNk3l8HDBbO0CkXFGLsbqpyJMMSrUag5WkpKypyDKIfRtxkDFX+lYX42tvnd82bCgu6VodiuCRh+13uFaUJRsvqu37kR52SH1gN8DiR+IXw4SGuUfPrGlUMa5AedeIXNYP5ByYqT1lX/6cUniV5aScsT3rFgoAtGu1dNluOvGBDx+hdh3X0vQcHIu0iTlp8Vdf53Gdtzx2clghLiYEWHX2ZYrZH5jnVZ+p1hvsHQNzYhgHcUtuMmt9p72wy8QaNLjYU=
   file_glob: true
   file:
-  - $GOPATH/src/github.com/aadyyb/precompiled_tools/releases/*.tar.gz
-  - $GOPATH/src/github.com/aadyyb/precompiled_tools/releases/*.tar.gz.sha256sum
+  - $TRAVIS_BUILD_DIR/cobra/release/*.tar.gz
+  - $TRAVIS_BUILD_DIR/cobra/release/*.tar.gz.sha256sum
   name: ${TRAVIS_TAG} Build $(date +'%d.%m.%Y %R')
   release_notes: "nightly build for new commit to cobra master"
   prerelease: true
   skip_cleanup: true
   on:
     repo: aadyyb/precompiled_tools
-    # tags: true
+    tags: true

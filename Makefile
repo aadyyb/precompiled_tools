@@ -1,4 +1,4 @@
-.PHONY: build-cobra build-ginkgo build-github-release-resource
+.PHONY: build-cobra build-ginkgo build-github-release-resource build-gopls
 
 .DEFAULT_GOAL := help
 SHELL := /usr/bin/env bash
@@ -7,6 +7,7 @@ GINKGO_SRC = github.com/onsi/ginkgo/ginkgo
 GITHUB_RELEASE_RESOURCE_CHECK_SRC = github.com/concourse/github-release-resource/cmd/check
 GITHUB_RELEASE_RESOURCE_IN_SRC = github.com/concourse/github-release-resource/cmd/in
 GITHUB_RELEASE_RESOURCE_OUT_SRC = github.com/concourse/github-release-resource/cmd/out
+GOPLS_SRC = golang.org/x/tools/gopls
 SHA512SUM = $(shell command -v sha256sum || echo "shasum -a 256")
 
 help:
@@ -55,3 +56,13 @@ build-github-release-resource: ### Build github-release-resource
 	tar -cvzf release/out-darwin-amd64.tar.gz -C build/darwin/amd64 out
 	$(SHA512SUM) release/out-linux-amd64.tar.gz >release/out-linux-amd64.tar.gz.sha256sum
 	$(SHA512SUM) release/out-darwin-amd64.tar.gz >release/out-darwin-amd64.tar.gz.sha256sum
+build-gopls: ### Build gopls
+	rm -rf build
+	rm -rf release
+	mkdir -p build/linux/amd64 && GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/gopls $(GOPLS_SRC)
+	mkdir -p build/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -o build/darwin/amd64/gopls $(GOPLS_SRC)
+	mkdir -p release/
+	tar -cvzf release/gopls-linux-amd64.tar.gz -C build/linux/amd64 gopls
+	tar -cvzf release/gopls-darwin-amd64.tar.gz -C build/darwin/amd64 gopls
+	$(SHA512SUM) release/gopls-linux-amd64.tar.gz >release/gopls-linux-amd64.tar.gz.sha256sum
+	$(SHA512SUM) release/gopls-darwin-amd64.tar.gz >release/gopls-darwin-amd64.tar.gz.sha256sum

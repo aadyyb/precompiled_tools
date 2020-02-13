@@ -7,26 +7,26 @@ go:
 - "1.13.7"
 branches:
   only:
-  - gopls-tag
+  - govim-latest-stable
 before_install:
   - sudo apt-get -y install jq
 addons:
   apt:
     update: true
 install:
-- GOPLS_TAG=$(git ls-remote --tags https://github.com/golang/tools.git | grep refs/tags/gopls | tail -1 | sed 's@.*refs/tags/\(.*\)\^{}@\1@')
-- export GOPLS_TAG
-- git clone --branch "${GOPLS_TAG}" https://github.com/golang/tools.git "${GOPATH}/src/golang.org/x/tools"
+- GOVIM_TAG=$(curl -s https://api.github.com/repos/govim/govim/releases/latest | jq -r .tag_name)
+- export GOVIM_TAG
+- git clone --branch "${GOVIM_TAG}" https://github.com/govim/govim.git "${GOPATH}/src/github.com/govim/govim"
 script:
   - |-
-    export TRAVIS_TAG="${GOPLS_TAG}" # gopls/v0.3.2-pre
+    export TRAVIS_TAG="govim-${GOVIM_TAG}"
     if curl -sSLf "https://api.github.com/repos/aadyyb/precompiled_tools/releases/tags/${TRAVIS_TAG}" -o /dev/null; then
       echo "Release exists, skip the build"
       unset TRAVIS_TAG
       exit 0
     else
-      cd ${GOPATH}/src/golang.org/x/tools/gopls
-      make -f ${TRAVIS_BUILD_DIR}/Makefile build-gopls
+      cd ${GOPATH}/src/github.com/govim/govim
+      make -f ${TRAVIS_BUILD_DIR}/Makefile build-govim
     fi
 before_deploy:
   - |-
@@ -44,10 +44,10 @@ deploy:
     secure: YgWI3BxQUX23H+KQ5LZULs3lT3QrqourFRcBDjIRe1iU098CxJ4dOR3D4vbqaVDu1ye7ePPX78aCNa1TxcktK9CZzTnd662EYQSiPYww1sTxLYgLX8mrbcG/MyZAq7IpclI26NVlV1AILdy2j5I0Ogwh3Y3IQQ3uQDM+BdsP/VIqZhLzufWX7SRlyWeUNi8TlpOw39yo6itVYX0DP5/MUOI7fqno3zNURgsBgtQ0psGl7wWVVZfpd5m6ObpuD3FuStSkip1BXsFBeTtP5wzN/prJxgeAyBrdIQUHxQR4mRiBhWeyOcEsR+xrZciGR/o1aNqf4tXdn8zI7909MuEoWawGCHFB4w4pyK+zeQhE22FVGBP8rsTiqkhT5H5Uhgxujh1JKtfImqlV4ycSUSSFe2gfyTX/fEhtlx4VnMhMvNk3l8HDBbO0CkXFGLsbqpyJMMSrUag5WkpKypyDKIfRtxkDFX+lYX42tvnd82bCgu6VodiuCRh+13uFaUJRsvqu37kR52SH1gN8DiR+IXw4SGuUfPrGlUMa5AedeIXNYP5ByYqT1lX/6cUniV5aScsT3rFgoAtGu1dNluOvGBDx+hdh3X0vQcHIu0iTlp8Vdf53Gdtzx2clghLiYEWHX2ZYrZH5jnVZ+p1hvsHQNzYhgHcUtuMmt9p72wy8QaNLjYU=
   file_glob: true
   file:
-  - ${GOPATH}/src/golang.org/x/tools/gopls/release/*.tar.gz
-  - ${GOPATH}/src/golang.org/x/tools/gopls/release/*.tar.gz.sha256sum
+  - ${GOPATH}/src/github.com/govim/govim/release/*.tar.gz
+  - ${GOPATH}/src/github.com/govim/govim/release/*.tar.gz.sha256sum
   name: ${TRAVIS_TAG} Build $(date +'%d.%m.%Y %R')
-  release_notes: "nightly build for new gopls tag"
+  release_notes: "nightly build for new govim stable release"
   prerelease: true
   skip_cleanup: true
   on:

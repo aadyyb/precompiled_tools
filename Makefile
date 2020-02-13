@@ -1,4 +1,4 @@
-.PHONY: build-cobra build-ginkgo build-github-release-resource build-gopls
+.PHONY: build-cobra build-ginkgo build-github-release-resource build-gopls build-govim
 
 .DEFAULT_GOAL := help
 SHELL := /usr/bin/env bash
@@ -8,6 +8,7 @@ GITHUB_RELEASE_RESOURCE_CHECK_SRC = github.com/concourse/github-release-resource
 GITHUB_RELEASE_RESOURCE_IN_SRC = github.com/concourse/github-release-resource/cmd/in
 GITHUB_RELEASE_RESOURCE_OUT_SRC = github.com/concourse/github-release-resource/cmd/out
 GOPLS_SRC = golang.org/x/tools/gopls
+GOVIM_SRC = github.com/govim/govim/cmd/govim
 SHA512SUM = $(shell command -v sha256sum || echo "shasum -a 256")
 
 help:
@@ -66,3 +67,13 @@ build-gopls: ### Build gopls
 	tar -cvzf release/gopls-darwin-amd64.tar.gz -C build/darwin/amd64 gopls
 	$(SHA512SUM) release/gopls-linux-amd64.tar.gz >release/gopls-linux-amd64.tar.gz.sha256sum
 	$(SHA512SUM) release/gopls-darwin-amd64.tar.gz >release/gopls-darwin-amd64.tar.gz.sha256sum
+build-govim: ### Build govim
+	rm -rf build
+	rm -rf release
+	mkdir -p build/linux/amd64 && GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/govim $(GOVIM_SRC)
+	mkdir -p build/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -o build/darwin/amd64/govim $(GOVIM_SRC)
+	mkdir -p release/
+	tar -cvzf release/govim-linux-amd64.tar.gz -C build/linux/amd64 govim
+	tar -cvzf release/gogovimpls-darwin-amd64.tar.gz -C build/darwin/amd64 govim
+	$(SHA512SUM) release/govim-linux-amd64.tar.gz >release/govim-linux-amd64.tar.gz.sha256sum
+	$(SHA512SUM) release/govim-darwin-amd64.tar.gz >release/govim-darwin-amd64.tar.gz.sha256sum

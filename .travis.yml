@@ -9,12 +9,16 @@ branches:
   only:
   - govim-latest-stable
 before_install:
-  - sudo apt-get -y install jq
-addons:
-  apt:
-    update: true
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -y install jq; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install jq 2>&1 > /dev/null; echo $?; fi
+# addons:
+#   apt:
+#     update: true
 install:
-- GOVIM_TAG=$(curl -s https://api.github.com/repos/govim/govim/releases/latest | jq -r .tag_name)
+- echo $TRAVIS_GITHUB_TOKEN
+- 'curl -s -H "AUTHORIZATION: token $TRAVIS_GITHUB_TOKEN" https://api.github.com/repos/govim/govim/releases/latest'
+- GOVIM_TAG=$(curl -s -H "AUTHORIZATION: token $TRAVIS_GITHUB_TOKEN" https://api.github.com/repos/govim/govim/releases/latest | jq -r .tag_name)
+- echo $GOVIM_TAG
 - export GOVIM_TAG
 - git clone --branch "${GOVIM_TAG}" https://github.com/govim/govim.git "${GOPATH}/src/github.com/govim/govim"
 script:

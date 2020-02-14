@@ -74,6 +74,6 @@ build-govim: ### Build govim
 	mkdir -p build/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -o build/darwin/amd64/govim $(GOVIM_SRC)
 	mkdir -p release/
 	tar -cvzf release/govim-linux-amd64.tar.gz -C build/linux/amd64 govim
-	tar -cvzf release/gogovimpls-darwin-amd64.tar.gz -C build/darwin/amd64 govim
+	tar -cvzf release/govim-darwin-amd64.tar.gz -C build/darwin/amd64 govim
 	$(SHA512SUM) release/govim-linux-amd64.tar.gz >release/govim-linux-amd64.tar.gz.sha256sum
 	$(SHA512SUM) release/govim-darwin-amd64.tar.gz >release/govim-darwin-amd64.tar.gz.sha256sum

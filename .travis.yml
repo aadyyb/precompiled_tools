@@ -3,6 +3,10 @@ dist: bionic
 language: go
 os:
   - osx
+matrix:
+  include:
+  - os: osx
+    osx_image: xcode11.3
 go:
 - "1.13.7"
 branches:
@@ -15,9 +19,8 @@ before_install:
 #   apt:
 #     update: true
 install:
-- echo $TRAVIS_GITHUB_TOKEN
-- 'curl -s -H "AUTHORIZATION: token $TRAVIS_GITHUB_TOKEN" https://api.github.com/repos/govim/govim/releases/latest'
-- GOVIM_TAG=$(curl -s -H "AUTHORIZATION: token $TRAVIS_GITHUB_TOKEN" https://api.github.com/repos/govim/govim/releases/latest | jq -r .tag_name)
+# - 'curl -s -H "AUTHORIZATION: token $TRAVIS_GITHUB_TOKEN" https://api.github.com/repos/govim/govim/releases/latest'
+- 'GOVIM_TAG=$(curl -s -H "AUTHORIZATION: token $TRAVIS_GITHUB_TOKEN" https://api.github.com/repos/govim/govim/releases/latest | jq -r .tag_name)'
 - echo $GOVIM_TAG
 - export GOVIM_TAG
 - git clone --branch "${GOVIM_TAG}" https://github.com/govim/govim.git "${GOPATH}/src/github.com/govim/govim"

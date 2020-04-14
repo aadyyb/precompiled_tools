@@ -10,6 +10,7 @@ GITHUB_RELEASE_RESOURCE_OUT_SRC = github.com/concourse/github-release-resource/c
 GOPLS_SRC = golang.org/x/tools/gopls
 GOVIM_SRC = github.com/govim/govim/cmd/govim
 GOMACRO_SRC = github.com/cosmos72/gomacro
+GORE_SRC = github.com/motemen/gore/cmd/gore
 SHA512SUM = $(shell command -v sha256sum || echo "shasum -a 256")
 
 help:
@@ -88,3 +89,13 @@ build-gomacro: ### Build gomacro
 	tar -cvzf release/gomacro-darwin-amd64.tar.gz -C build/darwin/amd64 gomacro
 	$(SHA512SUM) release/gomacro-linux-amd64.tar.gz >release/gomacro-linux-amd64.tar.gz.sha256sum
 	$(SHA512SUM) release/gomacro-darwin-amd64.tar.gz >release/gomacro-darwin-amd64.tar.gz.sha256sum
+build-gore: ### Build gore
+	rm -rf build
+	rm -rf release
+	mkdir -p build/linux/amd64 && GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/gore $(GORE_SRC)
+	mkdir -p build/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -o build/darwin/amd64/gore $(GORE_SRC)
+	mkdir -p release/
+	tar -cvzf release/gore-linux-amd64.tar.gz -C build/linux/amd64 gore
+	tar -cvzf release/gore-darwin-amd64.tar.gz -C build/darwin/amd64 gore
+	$(SHA512SUM) release/gore-linux-amd64.tar.gz >release/gore-linux-amd64.tar.gz.sha256sum
+	$(SHA512SUM) release/gore-darwin-amd64.tar.gz >release/gore-darwin-amd64.tar.gz.sha256sum
